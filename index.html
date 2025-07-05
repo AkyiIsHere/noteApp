@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Note</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav-container">
+        <nav class="nav" id="nav">
+          <h1 class="logo">Note App</h1>
+          <button class="new-btn">+ New Note</button>
+          <ul class="nav-menu" id="nav-menu">
+            <!-- Dynamic Note List -->
+          </ul>
+        </nav>
+      </div>
+      <button class="menu-btn" id="menuBtn">
+        <span class="arr-icon">&#11208;</span>
+      </button>
+
+      <main class="main" id="main">
+        <section class="note-container">
+          <div class="title" id="noteTitle">
+            <h1 id="note-title">Note App</h1>
+            <div class="btn-container">
+              <button class="edit-btn btn" id="note-edit">Edit</button>
+              <button class="delete-btn btn" id="note-delete">Delete</button>
+            </div>
+            <button class="burger-btn">&#9776;</button>
+          </div>
+          <div class="note-content" id="note-content-container">
+            <h2 id="sub-title">Add New Note</h2>
+            <p id="note-body">
+              Click new note button in sidebar to create new note.
+            </p>
+          </div>
+        </section>
+        <!-- note form -->
+        <div class="form-container">
+          <h2 class="form-title title">New Note</h2>
+          <form action="" id="note-form">
+            <div class="form-control">
+              <label>Title</label>
+              <input
+                type="text"
+                name="note-title"
+                id="note-title-input"
+                placeholder="Note title..."
+                autocomplete="off"
+                required
+              />
+            </div>
+            <div class="form-control">
+              <label>Content</label>
+              <textarea
+                name="note-content"
+                id="note-content-input"
+                placeholder="Type your notes here..."
+                class="auto-expand"
+                required
+              ></textarea>
+            </div>
+            <div class="form-btn-group">
+              <button type="button" class="btn cancel-btn" id="cancel-btn">
+                Cancel
+              </button>
+              <button type="submit" class="btn submit-btn" id="submit-btn">
+                Add Note
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
