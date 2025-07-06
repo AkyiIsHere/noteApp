@@ -1,5 +1,3 @@
----
-
 # Note App
 
 A simple and intuitive web-based Note App designed to help users create, manage, and organize their notes efficiently. This application features a responsive design, local storage for data persistence, and a clean user interface.
@@ -83,5 +81,3 @@ Feel free to change these values to match your preferred color scheme.
 - **Rich Text Editor:** Integrate a rich text editor for more formatting options (bold, italics, lists, etc.).
 - **Drag and Drop Reordering:** Allow users to reorder notes in the sidebar.
 - **Export/Import Notes:** Provide options to export notes as a file or import notes from a file.
-
----
