@@ -2,6 +2,10 @@
 
 A simple and intuitive web-based Note App designed to help users create, manage, and organize their notes efficiently. This application features a responsive design, local storage for data persistence, and a clean user interface.
 
+## Live Demo
+
+https://akyiishere.github.io/noteApp/
+
 ## Features
 
 - **Create New Notes:** Easily add new notes with titles and detailed content.

@@ -150,7 +150,6 @@
   const setNavOpen = (isOpen) => {
     state.isNavOpen = isOpen;
     render();
-    // console.log("setNavOpen");
 
     state.isNavOpen
       ? document.addEventListener("click", clickOutsideHandler)
@@ -200,7 +199,7 @@
       state.isBurgerOpen = false;
 
       if (isSmallScreen()) {
-        state.isNavOpen = false;
+        setNavOpen(false);
       }
     }
 
@@ -224,7 +223,7 @@
     }
 
     if (isSmallScreen()) {
-      state.isNavOpen = false;
+      setNavOpen(false);
     }
 
     render();
