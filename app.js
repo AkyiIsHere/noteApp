@@ -1,4 +1,4 @@
-// -- IIFE (Immediate Invoke Function Expressin) to avoid global population and improve encapsulation
+// -- IIFE (Immediate Invoke Function Expression) to avoid global population and improve encapsulation
 (function () {
   // --- CONFIG & CONSTANTS ---
   const config = {
@@ -47,17 +47,28 @@
   // --- STATE MANAGEMENT ---
   // The single source of truth for the application
   const state = {
-    notes: [],
-    activeNodeId: null,
-    isNavOpen: !isSmallScreen(),
-    isBurgerOpen: false,
-    isFormVisible: false,
-    isEditing: false,
+    ui: {
+      isNavOpen: !isSmallScreen(),
+      isBurgerOpen: false,
+      isFormVisible: false,
+      isEditing: false,
+    },
+    data: {
+      notes: [],
+      activeNodeId: null,
+    },
   };
 
   // --- LOCALSTORAGE API ---
   const storageAPI = {
-    getAll: () => JSON.parse(localStorage.getItem(config.STORAGE_KEY)) || [],
+    getAll: () => {
+      try {
+        return JSON.parse(localStorage.getItem(config.STORAGE_KEY)) || [];
+      } catch (err) {
+        console.warn("Failed to parse notes from localStorage:", err);
+        return [];
+      }
+    },
     saveAll: (notes) =>
       localStorage.setItem(config.STORAGE_KEY, JSON.stringify(notes)),
   };
@@ -81,19 +92,20 @@
     el?.classList.toggle(className, force);
 
   // --- RENDER FUNCTION ---
-  // Updates the entire UI based on the current state
-  const render = () => {
-    //Render navigation
-    toggleClass(elements.navContainer, config.ACTIVE_CLASS, state.isNavOpen);
-    toggleClass(elements.nav, config.ACTIVE_CLASS, state.isNavOpen);
-    toggleClass(elements.arrIcon, config.ACTIVE_CLASS, state.isNavOpen);
-    elements.menuBtn.style.left = state.isNavOpen
+  //Render Navigation
+  const renderNav = () => {
+    toggleClass(elements.navContainer, config.ACTIVE_CLASS, state.ui.isNavOpen);
+    toggleClass(elements.nav, config.ACTIVE_CLASS, state.ui.isNavOpen);
+    toggleClass(elements.arrIcon, config.ACTIVE_CLASS, state.ui.isNavOpen);
+    elements.menuBtn.style.left = state.ui.isNavOpen
       ? `${elements.nav.offsetWidth}px`
       : "0";
+  };
 
-    //Render note list
+  //Render note list
+  const renderNoteList = () => {
     elements.navMenu.textContent = ""; // Clear existing list
-    state.notes.forEach((note) => {
+    state.data.notes.forEach((note) => {
       const li = document.createElement("li");
       const a = document.createElement("a");
       a.href = "#";
@@ -102,22 +114,24 @@
       a.textContent = isSmallScreen()
         ? note.title.slice(0, 10)
         : note.title.slice(0, 20);
-      if (note.id === state.activeNodeId) {
+      if (note.id === state.data.activeNodeId) {
         a.classList.add(config.ACTIVE_CLASS);
       }
       li.appendChild(a);
       elements.navMenu.appendChild(li);
     });
+  };
 
-    // Render active note display
-    const activeNote = state.notes.find(
-      (note) => note.id === state.activeNodeId
+  // Render active note display
+  const renderActiveNote = () => {
+    const activeNote = state.data.notes.find(
+      (note) => note.id === state.data.activeNodeId
     );
 
     if (activeNote) {
       const title = isSmallScreen()
         ? activeNote.title.slice(0, 20)
-        : state.isNavOpen
+        : state.ui.isNavOpen
         ? activeNote.title.slice(0, 24)
         : activeNote.title.slice(0, 90);
       elements.noteTitle.textContent = title;
@@ -129,29 +143,50 @@
       elements.noteBody.textContent =
         "Select a note from the sidebar or create a new one.";
     }
+  };
 
-    // Render Form visibility and state
-    toggleClass(elements.formContainer, config.OPEN_CLASS, state.isFormVisible);
-    elements.noteContainer.style.display = state.isFormVisible
+  // Render Form visibility and state
+  const renderForm = () => {
+    toggleClass(
+      elements.formContainer,
+      config.OPEN_CLASS,
+      state.ui.isFormVisible
+    );
+    elements.noteContainer.style.display = state.ui.isFormVisible
       ? "none"
       : "block";
-    toggleClass(elements.submitBtn, "update-btn", state.isEditing);
-    toggleClass(elements.updateBtn, "submit-btn", !state.isEditing);
-    elements.submitBtn.textContent = state.isEditing
+    toggleClass(elements.submitBtn, "update-btn", state.ui.isEditing);
+    toggleClass(elements.updateBtn, "submit-btn", !state.ui.isEditing);
+    elements.submitBtn.textContent = state.ui.isEditing
       ? "Update Note"
       : "Add Note";
+  };
 
+  const renderBurgerBtn = () => {
     // Render Burger Btn
-    toggleClass(elements.btnContainer, config.ACTIVE_CLASS, state.isBurgerOpen);
+    toggleClass(
+      elements.btnContainer,
+      config.ACTIVE_CLASS,
+      state.ui.isBurgerOpen
+    );
+  };
+
+  // Updates the entire UI based on the current state
+  const render = () => {
+    renderNav();
+    renderNoteList();
+    renderActiveNote();
+    renderForm();
+    renderBurgerBtn();
   };
 
   // --- ACTIONS & EVENT HANDLERS ---
 
   const setNavOpen = (isOpen) => {
-    state.isNavOpen = isOpen;
+    state.ui.isNavOpen = isOpen;
     render();
 
-    state.isNavOpen
+    state.ui.isNavOpen
       ? document.addEventListener("click", clickOutsideHandler)
       : document.removeEventListener("click", clickOutsideHandler);
   };
@@ -163,27 +198,27 @@
       e.target !== elements.arrIcon;
 
     if (isSmallScreen() && clickedOutside) {
-      setNavOpen(!state.isNavOpen);
+      setNavOpen(!state.ui.isNavOpen);
     }
   };
 
   const setBurgerOpen = (isOpen) => {
     if (isSmallScreen()) {
-      state.isBurgerOpen = isOpen;
+      state.ui.isBurgerOpen = isOpen;
       render();
 
-      state.isBurgerOpen
-        ? document.addEventListener("click", closeBrugerHandler)
-        : document.removeEventListener("click", closeBrugerHandler);
+      state.ui.isBurgerOpen
+        ? document.addEventListener("click", closeBurgerHandler)
+        : document.removeEventListener("click", closeBurgerHandler);
     }
   };
 
-  const closeBrugerHandler = (e) => {
+  const closeBurgerHandler = (e) => {
     const clickedOutside =
       !elements.btnContainer.contains(e.target) &&
       e.target !== elements.burgerBtn;
 
-    if (clickedOutside && !state.isNavOpen) {
+    if (clickedOutside && !state.ui.isNavOpen) {
       setBurgerOpen(false);
     }
   };
@@ -194,9 +229,9 @@
 
     if (link) {
       e.preventDefault();
-      state.activeNodeId = Number(link.dataset.id);
-      state.isFormVisible = false;
-      state.isBurgerOpen = false;
+      state.data.activeNodeId = Number(link.dataset.id);
+      state.ui.isFormVisible = false;
+      state.ui.isBurgerOpen = false;
 
       if (isSmallScreen()) {
         setNavOpen(false);
@@ -207,14 +242,14 @@
   };
 
   const openForm = (isEditing = false, note = null) => {
-    state.isFormVisible = true;
-    state.isEditing = isEditing;
-    !isEditing && (state.activeNodeId = null);
+    state.ui.isFormVisible = true;
+    state.ui.isEditing = isEditing;
+    // !isEditing && (state.data.activeNodeId = null);
 
     if (isEditing && note) {
       elements.titleInput.value = note.title;
       elements.contentInput.value = note.content;
-      //cause scrollHeight can be calculated after rendering
+      //cause scrollHeight can be calculated only after rendering
       // elements.contentInput.style.height =
       //   elements.contentInput.scrollHeight + "px";
     } else {
@@ -237,7 +272,7 @@
   };
 
   const closeForm = () => {
-    state.isFormVisible = false;
+    state.ui.isFormVisible = false;
     render();
   };
 
@@ -248,42 +283,51 @@
     const title = noteForm.get("note-title").trim();
     const content = noteForm.get("note-content").trim();
 
-    if (state.isEditing) {
-      //Updaet existing note
-      const noteIndex = state.notes.findIndex(
-        (n) => n.id === state.activeNodeId
+    if (state.ui.isEditing) {
+      //Update existing note
+      const noteIndex = state.data.notes.findIndex(
+        (n) => n.id === state.data.activeNodeId
       );
       if (noteIndex > -1) {
-        state.notes[noteIndex] = { ...state.notes[noteIndex], title, content };
+        state.data.notes[noteIndex] = {
+          ...state.data.notes[noteIndex],
+          title,
+          content,
+        };
       }
     } else {
       const newNote = { id: Date.now(), title, content };
-      state.notes.push(newNote);
-      state.activeNodeId = newNote.id;
+      state.data.notes.push(newNote);
+      state.data.activeNodeId = newNote.id;
     }
 
-    storageAPI.saveAll(state.notes);
+    storageAPI.saveAll(state.data.notes);
     closeForm();
   };
 
   const handleEditClick = () => {
-    if (!state.activeNodeId) {
+    if (!state.data.activeNodeId) {
       alert("Please select a note to edit.");
       return;
     }
-    const noteToEdit = state.notes.find((n) => n.id === state.activeNodeId);
+    const noteToEdit = state.data.notes.find(
+      (n) => n.id === state.data.activeNodeId
+    );
     openForm((isEditing = true), noteToEdit);
   };
 
   const handleDeleteClick = () => {
-    if (!state.activeNodeId) {
+    if (!state.data.activeNodeId) {
       alert("Please select a note to delete.");
       return;
     }
     if (confirm("Are you sure you want to delete this note?")) {
-      state.notes = state.notes.filter((n) => n.id !== state.activeNodeId);
-      state.activeNodeId = state.notes.length > 0 ? state.notes[0].id : null;
-      storageAPI.saveAll(state.notes);
+      state.data.notes = state.data.notes.filter(
+        (n) => n.id !== state.data.activeNodeId
+      );
+      state.data.activeNodeId =
+        state.data.notes.length > 0 ? state.data.notes[0].id : null;
+      storageAPI.saveAll(state.data.notes);
       render();
     }
   };
@@ -305,7 +349,7 @@
   const addEventListeners = () => {
     elements.menuBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      setNavOpen(!state.isNavOpen);
+      setNavOpen(!state.ui.isNavOpen);
     });
     elements.newBtn.addEventListener("click", () => openForm());
     elements.cancelBtn.addEventListener("click", closeForm);
@@ -315,16 +359,16 @@
     elements.navMenu.addEventListener("click", handleNavClick);
     elements.burgerBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      setBurgerOpen(!state.isBurgerOpen);
+      setBurgerOpen(!state.ui.isBurgerOpen);
     });
   };
 
   function init() {
     addEventListeners();
     setupAutoExpand();
-    state.notes = storageAPI.getAll();
-    if (state.notes.length > 0) {
-      state.activeNodeId = state.notes[0].id;
+    state.data.notes = storageAPI.getAll();
+    if (state.data.notes.length > 0) {
+      state.data.activeNodeId = state.data.notes[0].id;
     }
     // document.addEventListener("click", (e) => console.log(e.target));
     render();
